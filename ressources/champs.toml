@@ -1,0 +1,28 @@
+[champions.0]
+    name = "Orianna"
+    gender = "female"
+    position = "middle"
+    species = "golem"
+    ressource = "Mana"
+    range = "ranged"
+[champions.1]
+    name = "Gragas"
+    gender = "male"
+    position = "jungle, top"
+    species = "Human"
+    ressource = "Mana"
+    range = "Melee"
+[champions.2]
+    name = "Zed"
+    gender = "male"
+    position = "Middle"
+    species = "Human, Magically Altered"
+    ressource = "Energy"
+    range = "Melee"
+[champions.3]
+    name = "Zoe"
+    gender = "female"
+    position = "middle"
+    species = "Aspect, Human"
+    ressource = "Mana"
+    range = "ranged"
