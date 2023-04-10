@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/bwmarrin/discordgo"
@@ -21,12 +22,13 @@ var V player
 
 type (
 	cham struct {
-		Name      string
-		Gender    string
-		Position  string
-		Species   string
-		Ressource string
-		Range     string
+		Name       string
+		Gender     string
+		Position   string
+		Species    string
+		Ressources string
+		Range      string
+		Region     string
 	}
 	player struct {
 		Champions map[string]cham
@@ -34,12 +36,13 @@ type (
 )
 
 type Car struct {
-	Name      string
-	Gender    string
-	Position  string
-	Species   string
-	Ressource string
-	Range     string
+	Name       string
+	Gender     string
+	Position   string
+	Species    string
+	Ressources string
+	Range      string
+	Region     string
 }
 
 func Init() {
@@ -54,7 +57,6 @@ func Init() {
 	}
 
 	println(len(V.Champions))
-	b := 0
 	t := new(Car)
 
 	for i := 0; i < (len(V.Champions)); i++ {
@@ -64,21 +66,22 @@ func Init() {
 		t.Gender = V.Champions[""+o+""].Gender
 		t.Position = V.Champions[""+o+""].Position
 		t.Range = V.Champions[""+o+""].Range
-		t.Ressource = V.Champions[""+o+""].Ressource
+		t.Ressources = V.Champions[""+o+""].Ressources
 		t.Species = V.Champions[""+o+""].Species
+		t.Region = V.Champions[""+o+""].Region
 		// println(t.Name)
 
 		Champ = append(Champ, &Car{
-			Name:      t.Name,
-			Gender:    t.Gender,
-			Position:  t.Position,
-			Species:   t.Species,
-			Ressource: t.Ressource,
-			Range:     t.Range,
+			Name:       t.Name,
+			Gender:     t.Gender,
+			Position:   t.Position,
+			Species:    t.Species,
+			Ressources: t.Ressources,
+			Range:      t.Range,
+			Region:     t.Region,
 		})
-		print(Champ[b].Name + "\n")
-		b = +1
 	}
+	println("List Loaded")
 }
 
 func Message(s *discordgo.Session, message *discordgo.MessageCreate) {
@@ -91,68 +94,16 @@ func Message(s *discordgo.Session, message *discordgo.MessageCreate) {
 	switch strings.Split(message.Content, " ")[0] {
 	case "!ping":
 		s.ChannelMessageSend(message.ChannelID, "pong!")
-	case "test":
-		for i := range Champ {
-			println(Champ[i].Name)
-		}
+	case "!guess":
 		if !Discovered {
-			for i := range Champ {
-				var Gender string
-				var Position string
-				var Species string
-				var Ressource string
-				var Range string
-				// println(c.Name)
-				// println(Champ[i].Name)
-				if strings.Split(message.Content, " ")[1] == Champ[i].Name {
-					if Need[0].Name == strings.Split(message.Content, " ")[1] {
-						s.ChannelMessageSend(message.ChannelID, "You found the champion, it was "+Need[0].Name)
-						Discovered = true
-					} else {
-						println("Passed")
-						if Need[0].Gender != Champ[i].Gender {
-							Gender = "false"
-						} else {
-							Gender = "True"
-						}
-
-						if Need[0].Position != Champ[i].Position {
-							Position = "false"
-						} else {
-							Position = "True"
-						}
-
-						if Need[0].Species != Champ[i].Species {
-							Species = "false"
-						} else {
-							Species = "True"
-						}
-
-						if Need[0].Ressource != Champ[i].Ressource {
-							Ressource = "false"
-						} else {
-							Ressource = "True"
-						}
-
-						if Need[0].Range != Champ[i].Range {
-							Range = "false"
-						} else {
-							Range = "True"
-						}
-						s.ChannelMessageSend(message.ChannelID, ("Name: " + Champ[i].Name +
-							"false \nGender: " + Champ[i].Gender + " " + Gender +
-							"\nPosition: " + Champ[i].Position + " " + Position +
-							"\nSpecies: " + Champ[i].Species + " " + Species +
-							"\nRessource: " + Champ[i].Ressource + " " + Ressource +
-							"\nRange: " + Champ[i].Range + " " + Range))
-					}
-				}
-			}
-			println(Need[0].Name)
+			discov(s, message)
+			return
 		}
 		if Discovered {
 			Discovered = false
-			RandomIntegerwithinRange := rand.Intn(len(V.Champions))
+
+			rand.Seed(time.Now().UTC().UnixNano())
+			RandomIntegerwithinRange := rand.Intn(len(Champ))
 
 			integer := strconv.Itoa(RandomIntegerwithinRange)
 
@@ -164,14 +115,104 @@ func Message(s *discordgo.Session, message *discordgo.MessageCreate) {
 			sauce.Gender = V.Champions[""+integer+""].Gender
 			sauce.Position = V.Champions[""+integer+""].Position
 			sauce.Range = V.Champions[""+integer+""].Range
-			sauce.Ressource = V.Champions[""+integer+""].Ressource
+			sauce.Ressources = V.Champions[""+integer+""].Ressources
 			sauce.Species = V.Champions[""+integer+""].Species
+			sauce.Region = V.Champions[""+integer+""].Region
 
 			Need[0] = sauce
 
 			println(Need[0].Name + "NEW §!!")
+
+			discov(s, message)
 		}
 
 	}
 
+}
+
+func discov(s *discordgo.Session, message *discordgo.MessageCreate) {
+	for i := range Champ {
+		var Gender string
+		var Position string
+		var Species string
+		var Ressource string
+		var Range string
+		var Region string
+		// println(c.Name)
+		// println(Champ[i].Name)
+		//var msg []string
+		//var c string
+
+		msg := strings.ToUpper(string(strings.Split(message.Content, "!guess ")[1]))
+
+		if msg == strings.ToUpper(Champ[i].Name) {
+			if strings.ToUpper(Need[0].Name) == msg {
+				s.ChannelMessageSend(message.ChannelID, "You found the champion, it was "+Need[0].Name)
+				Discovered = true
+			} else {
+				println("Passed")
+				if Need[0].Gender != Champ[i].Gender {
+					Gender = " ❌"
+				} else {
+					Gender = " ✅"
+				}
+
+				if Need[0].Position != Champ[i].Position {
+					Position = " ❌"
+				} else {
+					Position = " ✅"
+				}
+
+				if Need[0].Species != Champ[i].Species {
+					Species = " ❌"
+				} else {
+					Species = " ✅"
+				}
+
+				if Need[0].Ressources != Champ[i].Ressources {
+					Ressource = " ❌"
+				} else {
+					Ressource = " ✅"
+				}
+
+				if Need[0].Range != Champ[i].Range {
+					Range = " ❌"
+				} else {
+					Range = " ✅"
+				}
+
+				if Need[0].Region != Champ[i].Region {
+					Region = " ❌"
+				} else {
+					Region = " ✅"
+				}
+				s.ChannelMessageSendEmbeds(message.ChannelID, []*discordgo.MessageEmbed{
+					{
+						Title: Champ[i].Name,
+						Color: 16711680,
+						Fields: []*discordgo.MessageEmbedField{
+							{
+								Name: Champ[i].Gender + Gender,
+							},
+							{
+								Name: Champ[i].Position + Position,
+							},
+							{
+								Name: Champ[i].Species + Species,
+							},
+							{
+								Name: Champ[i].Ressources + Ressource,
+							},
+							{
+								Name: Champ[i].Range + Range,
+							},
+							{
+								Name: Champ[i].Region + Region,
+							},
+						},
+					},
+				})
+			}
+		}
+	}
 }
