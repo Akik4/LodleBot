@@ -130,6 +130,13 @@ func Message(s *discordgo.Session, message *discordgo.MessageCreate) {
 
 }
 
+func isValid(c bool) string {
+	if !c {
+		return " ❌"
+	}
+	return " ✅"
+}
+
 func discov(s *discordgo.Session, message *discordgo.MessageCreate) {
 	for i := range Champ {
 		var Gender string
@@ -151,41 +158,13 @@ func discov(s *discordgo.Session, message *discordgo.MessageCreate) {
 				Discovered = true
 			} else {
 				println("Passed")
-				if Need[0].Gender != Champ[i].Gender {
-					Gender = " ❌"
-				} else {
-					Gender = " ✅"
-				}
+				Gender = isValid(Need[0].Gender != Champ[i].Gender) 
+				Position = isValid(Need[0].Position != Champ[i].Position)
+				Species = isValid(Need[0].Species != Champ[i].Species)
+				Ressource = isValid(Need[0].Ressources != Champ[i].Ressources)
+				Range = isValid(Need[0].Range != Champ[i].Range)
+				Region = isValid(Need[0].Region != Champ[i].Region)
 
-				if Need[0].Position != Champ[i].Position {
-					Position = " ❌"
-				} else {
-					Position = " ✅"
-				}
-
-				if Need[0].Species != Champ[i].Species {
-					Species = " ❌"
-				} else {
-					Species = " ✅"
-				}
-
-				if Need[0].Ressources != Champ[i].Ressources {
-					Ressource = " ❌"
-				} else {
-					Ressource = " ✅"
-				}
-
-				if Need[0].Range != Champ[i].Range {
-					Range = " ❌"
-				} else {
-					Range = " ✅"
-				}
-
-				if Need[0].Region != Champ[i].Region {
-					Region = " ❌"
-				} else {
-					Region = " ✅"
-				}
 				s.ChannelMessageSendEmbeds(message.ChannelID, []*discordgo.MessageEmbed{
 					{
 						Title: Champ[i].Name,
