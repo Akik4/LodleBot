@@ -130,6 +130,13 @@ func Message(s *discordgo.Session, message *discordgo.MessageCreate) {
 
 }
 
+func isValid(c bool) string {
+	if !c {
+		return " ❌"
+	}
+	return " ✅"
+}
+
 func discov(s *discordgo.Session, message *discordgo.MessageCreate) {
 	for i := range Champ {
 		var Gender string
@@ -144,75 +151,53 @@ func discov(s *discordgo.Session, message *discordgo.MessageCreate) {
 		//var c string
 
 		msg := strings.ToUpper(string(strings.Split(message.Content, "!guess ")[1]))
-
-		if msg == strings.ToUpper(Champ[i].Name) {
-			if strings.ToUpper(Need[0].Name) == msg {
-				s.ChannelMessageSend(message.ChannelID, "You found the champion, it was "+Need[0].Name)
-				Discovered = true
-			} else {
-				println("Passed")
-				if Need[0].Gender != Champ[i].Gender {
-					Gender = " ❌"
-				} else {
-					Gender = " ✅"
-				}
-
-				if Need[0].Position != Champ[i].Position {
-					Position = " ❌"
-				} else {
-					Position = " ✅"
-				}
-
-				if Need[0].Species != Champ[i].Species {
-					Species = " ❌"
-				} else {
-					Species = " ✅"
-				}
-
-				if Need[0].Ressources != Champ[i].Ressources {
-					Ressource = " ❌"
-				} else {
-					Ressource = " ✅"
-				}
-
-				if Need[0].Range != Champ[i].Range {
-					Range = " ❌"
-				} else {
-					Range = " ✅"
-				}
-
-				if Need[0].Region != Champ[i].Region {
-					Region = " ❌"
-				} else {
-					Region = " ✅"
-				}
-				s.ChannelMessageSendEmbeds(message.ChannelID, []*discordgo.MessageEmbed{
-					{
-						Title: Champ[i].Name,
-						Color: 16711680,
-						Fields: []*discordgo.MessageEmbedField{
-							{
-								Name: Champ[i].Gender + Gender,
-							},
-							{
-								Name: Champ[i].Position + Position,
-							},
-							{
-								Name: Champ[i].Species + Species,
-							},
-							{
-								Name: Champ[i].Ressources + Ressource,
-							},
-							{
-								Name: Champ[i].Range + Range,
-							},
-							{
-								Name: Champ[i].Region + Region,
-							},
-						},
-					},
-				})
-			}
+		
+		// if this is not the champ name, continue
+		if msg != strings.ToUpper(Champ[i].Name) {
+			continue
 		}
+		// if this is the champ to guess, stop the func
+		if strings.ToUpper(Need[0].Name) == msg {
+			s.ChannelMessageSend(message.ChannelID, "You found the champion, it was "+Need[0].Name)
+			Discovered = true
+			return
+		}
+		// if this is not the champ to guess, send the information and stop the func
+		println("Passed")
+		Gender = isValid(Need[0].Gender != Champ[i].Gender) 
+		Position = isValid(Need[0].Position != Champ[i].Position)
+		Species = isValid(Need[0].Species != Champ[i].Species)
+		Ressource = isValid(Need[0].Ressources != Champ[i].Ressources)
+		Range = isValid(Need[0].Range != Champ[i].Range)
+		Region = isValid(Need[0].Region != Champ[i].Region)
+
+		s.ChannelMessageSendEmbeds(message.ChannelID, []*discordgo.MessageEmbed{
+			{
+				Title: Champ[i].Name,
+				Color: 16711680,
+				Fields: []*discordgo.MessageEmbedField{
+					{
+						Name: Champ[i].Gender + Gender,
+					},
+					{
+						Name: Champ[i].Position + Position,
+					},
+					{
+						Name: Champ[i].Species + Species,
+					},
+					{
+						Name: Champ[i].Ressources + Ressource,
+					},
+					{
+						Name: Champ[i].Range + Range,
+					},
+					{
+						Name: Champ[i].Region + Region,
+					},
+				},
+			},
+		})
+		return
 	}
 }
+
